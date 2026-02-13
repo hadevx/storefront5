@@ -285,25 +285,8 @@ export function usePayment(
         return;
       }
 
-      const out = await runServerStockCheck();
-      if (Array.isArray(out) && out.length > 0) {
-        toast.error("Some items are out of stock. Please update your cart.", {
-          position: "top-center",
-        });
-        return;
-      }
-
       const payload = buildCreateOrderPayload();
       const created = await createOrder(payload).unwrap();
-
-      // ✅ update stock AFTER order success
-      try {
-        await updateStockForOrder();
-      } catch (e) {
-        toast.info("Order placed, but stock update failed. Please refresh.", {
-          position: "top-center",
-        });
-      }
 
       // ✅ CLEAR CART HERE
       clearCartAfterSuccess();
@@ -312,7 +295,7 @@ export function usePayment(
 
       const newId = created?._id || created?.order?._id;
       if (newId) navigate(`/order/${newId}`);
-      else navigate("/orders");
+      else navigate("/profile");
     } catch (err) {
       toast.error(err?.data?.message || "Failed to place order", { position: "top-center" });
     }
