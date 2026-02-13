@@ -86,7 +86,7 @@ export default function HomeCategorySections() {
               </div>
 
               {/* Products Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-8">
                 {products.map((p, i) => (
                   <ProductCard key={p?._id} product={p} index={i} />
                 ))}

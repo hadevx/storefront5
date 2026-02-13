@@ -183,40 +183,6 @@ export default function Navigation() {
             {/* Right icons */}
             <div className="flex items-center gap-2 lg:gap-4">
               {/* Search */}
-              <div ref={searchContainerRef} className="relative hidden sm:flex items-center">
-                <AnimatePresence>
-                  {isSearchOpen && (
-                    <motion.div
-                      initial={{ width: 0, opacity: 0 }}
-                      animate={{ width: 200, opacity: 1 }}
-                      exit={{ width: 0, opacity: 0 }}
-                      transition={{ duration: 0.3, ease: "easeInOut" }}
-                      className="overflow-hidden">
-                      <input
-                        ref={searchInputRef}
-                        type="text"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Search..."
-                        className={`w-full bg-transparent border-b text-sm py-1 pr-2 outline-none transition-colors duration-500 ${
-                          useLightText
-                            ? "border-white/30 text-white placeholder:text-white/50"
-                            : "border-foreground/30 text-foreground placeholder:text-foreground/50"
-                        }`}
-                      />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                {/* Search icon toggler */}
-                <button
-                  type="button"
-                  onClick={() => setIsSearchOpen((v) => !v)}
-                  aria-label="Toggle search"
-                  className={`p-2 transition-colors duration-500 ${iconColor}`}>
-                  <Search className="h-5 w-5 stroke-[1.5]" />
-                </button>
-              </div>
 
               {/* Account */}
               <Link

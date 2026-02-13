@@ -8,18 +8,19 @@ import { Link } from "react-router-dom";
  * - crossfade to hover image
  * - serif name + muted price (no "Starting at")
  * - shows available colors as small circles below price
+ * - ✅ shows stock badges: Out of stock / Low stock
  *
- * Expects:
- * product.variants[].color  (e.g. "Black", "Red")
- * product.image[0].url
+ * Stock sources supported (best-effort):
+ * - product.stock / product.quantity / product.inventory / product.countInStock
+ * - product.variants[].stock / quantity / inventory (sums)
+ * - product.isOutOfStock / product.inStock boolean flags (fallback)
  */
-export default function ProductCard({ product, index = 0 }) {
+export default function ProductCard({ product, index = 0, lowStockThreshold = 5 }) {
   const [isHovered, setIsHovered] = useState(false);
 
   const id = product?._id;
   const name = product?.name || "Product";
 
-  console.log(product);
   const category = useMemo(() => {
     return (
       product?.category?.name ||
@@ -100,8 +101,73 @@ export default function ProductCard({ product, index = 0 }) {
       ivory: "#fffff0",
     };
 
-    return map[key] || "#e5e7eb"; // neutral fallback
+    return map[key] || "#e5e7eb";
   };
+
+  // ✅ Stock: compute a robust "totalStock" and flags
+  const stockInfo = useMemo(() => {
+    const p = product || {};
+    const variants = Array.isArray(p.variants) ? p.variants : [];
+
+    const toNum = (v) => {
+      const n = Number(v);
+      return Number.isFinite(n) ? n : null;
+    };
+
+    // 1) If variants have stock-like fields, sum them.
+    let variantSum = 0;
+    let hasVariantStockField = false;
+
+    for (const v of variants) {
+      const s =
+        toNum(v?.stock) ?? toNum(v?.quantity) ?? toNum(v?.inventory) ?? toNum(v?.countInStock);
+
+      if (s !== null) {
+        hasVariantStockField = true;
+        variantSum += Math.max(0, s);
+      }
+    }
+
+    // 2) Otherwise use product-level stock-like fields.
+    const productLevel =
+      toNum(p?.stock) ?? toNum(p?.quantity) ?? toNum(p?.inventory) ?? toNum(p?.countInStock);
+
+    // 3) Choose best total
+    const totalStock = hasVariantStockField ? variantSum : (productLevel ?? null);
+
+    // 4) Fallback boolean hints if no numeric stock is present
+    //    (supports common patterns: inStock true/false, isOutOfStock true/false)
+    const hintedOut = p?.isOutOfStock === true || p?.outOfStock === true || p?.inStock === false;
+
+    const hintedIn = p?.inStock === true || p?.isOutOfStock === false || p?.outOfStock === false;
+
+    const isOutOfStock = totalStock !== null ? totalStock <= 0 : hintedOut;
+
+    const isLowStock =
+      !isOutOfStock &&
+      totalStock !== null &&
+      totalStock > 0 &&
+      totalStock <= Number(lowStockThreshold || 0);
+
+    // If we only had a boolean "in stock" hint, don't show "low stock"
+    const canShowLowStock = totalStock !== null;
+
+    return {
+      totalStock,
+      isOutOfStock,
+      isLowStock: canShowLowStock ? isLowStock : false,
+    };
+  }, [product, lowStockThreshold]);
+
+  const badge = useMemo(() => {
+    if (stockInfo.isOutOfStock) {
+      return { text: "Out of stock", className: "bg-black/70 text-white" };
+    }
+    if (stockInfo.isLowStock) {
+      return { text: "Low stock", className: "bg-orange-500/70  text-white" };
+    }
+    return null;
+  }, [stockInfo]);
 
   return (
     <motion.div
@@ -113,9 +179,25 @@ export default function ProductCard({ product, index = 0 }) {
         to={`/product/${id}`}
         className="group block"
         onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}>
+        onMouseLeave={() => setIsHovered(false)}
+        aria-disabled={stockInfo.isOutOfStock ? true : undefined}>
         {/* Image block */}
-        <div className="relative aspect-[3/4] overflow-hidden bg-muted mb-4">
+        <div className="relative aspect-[3/4]  overflow-hidden bg-muted mb-4">
+          {/* ✅ Stock badge */}
+          {badge && (
+            <div className="absolute left-3 top-3 z-10">
+              <span
+                className={[
+                  "inline-flex  items-center rounded-full px-2 py-1",
+                  "text-xs  ",
+                  "backdrop-blur",
+                  badge.className,
+                ].join(" ")}>
+                {badge.text}
+              </span>
+            </div>
+          )}
+
           {/* Primary */}
           <img
             src={primaryImage}
@@ -143,6 +225,9 @@ export default function ProductCard({ product, index = 0 }) {
             transition={{ duration: 0.3 }}
             className="absolute inset-0 shadow-[inset_0_0_60px_rgba(0,0,0,0.10)]"
           />
+
+          {/* ✅ Optional: subtle dim when out of stock */}
+          {stockInfo.isOutOfStock && <div className="absolute inset-0 bg-black/10" />}
         </div>
 
         {/* Text */}
@@ -150,13 +235,13 @@ export default function ProductCard({ product, index = 0 }) {
           {/* Optional category line */}
           {/* <p className="text-xs tracking-[0.15em] uppercase text-muted-foreground">{category}</p> */}
 
-          <h3 className="font-serif text-lg leading-snug">{name}</h3>
+          <h3 className="font-serif text-lg leading-snug truncate">{name}</h3>
 
           <div className="text-sm text-muted-foreground tracking-wide">
             {product?.hasDiscount ? (
               <>
                 <span className="line-through mr-2">{oldPrice.toFixed(3)} KD</span>
-                <span className="text-foreground">{price.toFixed(3)} KD</span>
+                <span className="text-rose-600 font-bold">{price.toFixed(3)} KD</span>
               </>
             ) : (
               <span className="text-foreground">{price.toFixed(3)} KD</span>
