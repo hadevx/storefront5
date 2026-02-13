@@ -397,7 +397,7 @@ function Profile() {
             <button
               type="button"
               onClick={() => navigate(-1)}
-              className="inline-flex items-center gap-2 rounded-2xl border border-neutral-200 bg-white px-4 py-2.5 text-sm font-medium text-neutral-900 shadow-sm hover:bg-neutral-50 transition">
+              className="inline-flex items-center gap-2 rounded-md border border-neutral-200 bg-white px-4 py-2.5 text-sm font-medium text-neutral-900 shadow-sm hover:bg-neutral-50 transition">
               <ArrowLeft className="h-4 w-4" />
               Back
             </button>
@@ -406,7 +406,7 @@ function Profile() {
               type="button"
               onClick={handleLogout}
               disabled={loadingLogout}
-              className="inline-flex items-center gap-2 rounded-2xl bg-neutral-950 px-4 py-2.5 text-sm font-semibold text-white hover:bg-neutral-900 active:scale-[0.99] transition">
+              className="inline-flex items-center gap-2 rounded-md bg-neutral-950 px-4 py-2.5 text-sm font-semibold text-white hover:bg-neutral-900 active:scale-[0.99] transition">
               {loadingLogout ? (
                 <Spinner className="border-t-transparent" />
               ) : (

@@ -12,6 +12,7 @@ import {
   Download,
   Receipt,
   Timer,
+  Phone,
 } from "lucide-react";
 import { usePDF } from "react-to-pdf";
 import Invoice from "../../components/Invoise";
@@ -270,6 +271,100 @@ const SummaryCard = ({
 };
 
 // ---------------------------
+// Mobile Item Card (tuned)
+// - smaller image than previous
+// - cleaner layout
+// - ✅ "Unit after coupon" only when showDiscount
+// ---------------------------
+const MobileOrderItem = ({
+  item,
+  qty,
+  showDiscount,
+  beforeCouponUnit,
+  finalUnit,
+  lineDiscount,
+  lineTotal,
+}) => {
+  const variantLabel =
+    item?.variantColor || item?.variantSize
+      ? `${item.variantColor || "-"} / ${item.variantSize || "-"}`
+      : "No variant";
+
+  const imgSrc = item?.variantImage?.[0]?.url || item?.image?.[0]?.url;
+
+  return (
+    <div className="rounded-3xl border border-neutral-200 bg-white p-4">
+      <div className="flex gap-4">
+        {/* ✅ Image: bigger than old UI, smaller than last attempt */}
+        <div className="shrink-0">
+          <div className="relative h-28 w-24 overflow-hidden rounded-2xl border bg-neutral-50">
+            {imgSrc ? (
+              <img src={imgSrc} alt={item?.name} className="h-full w-full object-cover" />
+            ) : (
+              <div className="h-full w-full grid place-items-center text-[11px] text-neutral-400">
+                No image
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <div className="text-sm font-extrabold text-neutral-900 truncate">{item?.name}</div>
+              <div className="mt-1 text-xs text-neutral-500 truncate">{variantLabel}</div>
+            </div>
+
+            {/* Total */}
+            <div className="shrink-0 text-right">
+              <div className="text-[11px] text-neutral-500">Total</div>
+              <div className="mt-0.5 text-sm font-extrabold text-neutral-900">
+                {formatKD(lineTotal)}
+              </div>
+            </div>
+          </div>
+
+          {/* Pricing chips */}
+          <div className="mt-3 flex flex-wrap gap-2">
+            {/* ✅ show "Unit after coupon" only if discount/coupon exists */}
+            {showDiscount ? (
+              <span className="inline-flex items-center rounded-full bg-neutral-950 text-white px-3 py-1 text-[11px] font-extrabold">
+                Unit: {formatKD(finalUnit)}
+              </span>
+            ) : (
+              <span className="inline-flex items-center rounded-full bg-neutral-950 text-white px-3 py-1 text-[11px] font-extrabold">
+                Unit: {formatKD(beforeCouponUnit)}
+              </span>
+            )}
+
+            {showDiscount && (
+              <span className="inline-flex items-center rounded-full bg-white px-3 py-1 text-[11px] font-extrabold text-neutral-500 border border-neutral-200 line-through">
+                {formatKD(beforeCouponUnit)}
+              </span>
+            )}
+
+            {showDiscount && (
+              <span className="inline-flex items-center rounded-full bg-rose-50 px-3 py-1 text-[11px] font-extrabold text-rose-700 border border-rose-100">
+                -{formatKD(lineDiscount)}
+              </span>
+            )}
+          </div>
+
+          {/* Micro breakdown */}
+          <div className="mt-3 text-xs text-neutral-600">
+            <span className="font-semibold text-neutral-900">{qty}</span> ×{" "}
+            <span className="font-semibold text-neutral-900">
+              {formatKD(showDiscount ? finalUnit : beforeCouponUnit)}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ---------------------------
 // Main Page
 // ---------------------------
 const Order = () => {
@@ -364,7 +459,7 @@ const Order = () => {
                 onClick={() => toPDF()}
                 disabled={!order}
                 className={clsx(
-                  "inline-flex items-center gap-2 rounded-2xl px-4 py-2 text-sm font-extrabold transition",
+                  "inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-extrabold transition",
                   order
                     ? "bg-neutral-950 text-white hover:opacity-95"
                     : "bg-neutral-200 text-neutral-500 cursor-not-allowed",
@@ -374,15 +469,15 @@ const Order = () => {
               </button>
 
               <Link
-                to="mailto:hn98q8@hotmail.com"
-                className="inline-flex items-center gap-2 rounded-2xl border border-neutral-200 bg-white px-4 py-2 text-sm font-extrabold text-neutral-900 hover:bg-neutral-50">
-                <Mail className="h-4 w-4" />
+                to="https://wa.me/96598909936"
+                className="inline-flex items-center gap-2 rounded-md border border-neutral-200 bg-white px-4 py-2 text-sm font-extrabold text-neutral-900 hover:bg-neutral-50">
+                <Phone className="h-4 w-4" />
                 Contact
               </Link>
             </div>
           </div>
 
-          {/* ✅ Desktop: summary on the right. Mobile: summary at the bottom */}
+          {/* Desktop: summary on the right. Mobile: summary at the bottom */}
           <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_420px] lg:items-start">
             {/* LEFT */}
             <div className="space-y-6 min-w-0">
@@ -456,7 +551,6 @@ const Order = () => {
                           <tbody className="text-sm">
                             {order?.orderItems?.map((item) => {
                               const qty = Number(item?.qty) || 0;
-
                               const beforeCouponUnit = Number(item?.price) || 0;
 
                               const finalUnit = showDiscount
@@ -482,12 +576,15 @@ const Order = () => {
                                           {item.name}
                                         </div>
 
-                                        <div className="mt-1 text-xs text-neutral-500">
-                                          Unit (after coupon):{" "}
-                                          <span className="font-semibold text-neutral-900">
-                                            {formatKD(finalUnit)}
-                                          </span>
-                                        </div>
+                                        {/* ✅ Only show "Unit (after coupon)" if coupon exists */}
+                                        {showDiscount ? (
+                                          <div className="mt-1 text-xs text-neutral-500">
+                                            Unit (after coupon):{" "}
+                                            <span className="font-semibold text-neutral-900">
+                                              {formatKD(finalUnit)}
+                                            </span>
+                                          </div>
+                                        ) : null}
                                       </div>
                                     </div>
                                   </td>
@@ -526,8 +623,8 @@ const Order = () => {
                         </table>
                       </div>
 
-                      {/* Mobile cards */}
-                      <div className="md:hidden space-y-3">
+                      {/* ✅ Mobile cards (tuned image + no "after coupon" when none) */}
+                      <div className="md:hidden space-y-4">
                         {order?.orderItems?.map((item) => {
                           const qty = Number(item?.qty) || 0;
 
@@ -540,83 +637,16 @@ const Order = () => {
                           const lineTotal = qty * finalUnit;
 
                           return (
-                            <div
+                            <MobileOrderItem
                               key={item._id}
-                              className="rounded-2xl border border-neutral-200 bg-white p-4">
-                              <div className="flex items-start gap-3">
-                                <img
-                                  src={item?.variantImage?.[0]?.url || item.image?.[0]?.url}
-                                  alt={item.name}
-                                  className="h-14 w-14 rounded-2xl border bg-neutral-50 object-cover"
-                                />
-
-                                <div className="min-w-0 flex-1">
-                                  <div className="flex items-start justify-between gap-2">
-                                    <div className="min-w-0">
-                                      <div className="truncate text-sm font-extrabold text-neutral-900">
-                                        {item.name}
-                                      </div>
-                                      <div className="mt-1 text-xs text-neutral-500 truncate">
-                                        {item.variantColor || item.variantSize
-                                          ? `${item.variantColor || "-"} / ${item.variantSize || "-"}`
-                                          : "No variant"}
-                                      </div>
-                                      <div className="mt-2 text-xs text-neutral-500">
-                                        Unit (after coupon):{" "}
-                                        <span className="font-semibold text-neutral-900">
-                                          {formatKD(finalUnit)}
-                                        </span>
-                                      </div>
-                                    </div>
-
-                                    <div className="shrink-0 text-right">
-                                      <div className="text-xs text-neutral-500">
-                                        Qty{" "}
-                                        <span className="font-semibold text-neutral-900">
-                                          {qty}
-                                        </span>
-                                      </div>
-                                      <div className="mt-1 text-sm font-extrabold text-neutral-900">
-                                        {formatKD(lineTotal)}
-                                      </div>
-                                    </div>
-                                  </div>
-
-                                  <div className="mt-3 grid gap-2 sm:grid-cols-3">
-                                    {showDiscount && (
-                                      <div className="rounded-2xl bg-neutral-50 p-3">
-                                        <div className="text-[11px] font-semibold text-neutral-500">
-                                          Before
-                                        </div>
-                                        <div className="mt-1 text-sm font-extrabold text-neutral-900 line-through">
-                                          {formatKD(beforeCouponUnit)}
-                                        </div>
-                                      </div>
-                                    )}
-
-                                    {showDiscount && (
-                                      <div className="rounded-2xl bg-rose-50 p-3">
-                                        <div className="text-[11px] font-semibold text-rose-600">
-                                          Coupon
-                                        </div>
-                                        <div className="mt-1 text-sm font-extrabold text-rose-700">
-                                          -{formatKD(lineDiscount)}
-                                        </div>
-                                      </div>
-                                    )}
-
-                                    <div className="rounded-2xl bg-neutral-50 p-3">
-                                      <div className="text-[11px] font-semibold text-neutral-500">
-                                        Total
-                                      </div>
-                                      <div className="mt-1 text-sm font-extrabold text-neutral-900">
-                                        {formatKD(lineTotal)}
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
+                              item={item}
+                              qty={qty}
+                              showDiscount={showDiscount}
+                              beforeCouponUnit={beforeCouponUnit}
+                              finalUnit={finalUnit}
+                              lineDiscount={lineDiscount}
+                              lineTotal={lineTotal}
+                            />
                           );
                         })}
                       </div>
@@ -625,7 +655,7 @@ const Order = () => {
                 </div>
               </Card>
 
-              {/* ✅ Mobile summary at the bottom */}
+              {/* Mobile summary at the bottom */}
               <div className="lg:hidden">
                 <SummaryCard
                   order={order}
@@ -637,7 +667,7 @@ const Order = () => {
               </div>
             </div>
 
-            {/* ✅ Desktop summary on the right */}
+            {/* Desktop summary on the right */}
             <div className="hidden lg:block lg:sticky lg:top-24 min-w-0 space-y-6">
               <SummaryCard
                 order={order}

@@ -24,7 +24,7 @@ export default function FooterClone() {
                   />
                 </div>
 
-                <button className="h-11 shrink-0 rounded-xl bg-white px-5 text-sm font-semibold text-black hover:bg-zinc-100">
+                <button className="h-11 shrink-0 rounded-md bg-white px-5 text-sm font-semibold text-black hover:bg-zinc-100">
                   Subscribe
                 </button>
               </div>

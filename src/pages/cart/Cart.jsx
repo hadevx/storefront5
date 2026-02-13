@@ -563,7 +563,7 @@ function Cart() {
 
   return (
     <Layout>
-      <div className="mx-auto w-full max-w-[1200px] px-4 pt-20  pb-16">
+      <div className="mx-auto min-h-screen w-full max-w-[1200px] px-4 py-24">
         {/* Header */}
         <div className="flex flex-row justify-between gap-3 md:flex-row md:items-center md:justify-between">
           <div className="min-w-0">
@@ -575,7 +575,7 @@ function Cart() {
           <div className="shrink-0">
             <Link
               to="/all-products"
-              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-neutral-200 bg-white px-4 py-2.5 text-sm font-extrabold text-neutral-900 hover:bg-neutral-50">
+              className="inline-flex items-center justify-center gap-2 rounded-md border border-neutral-200 bg-white px-4 py-2.5 text-sm font-extrabold text-neutral-900 hover:bg-neutral-50">
               Continue shopping <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
@@ -603,7 +603,7 @@ function Cart() {
                 </div>
               </>
             ) : showEmpty ? (
-              <div className="rounded-3xl border border-neutral-200 bg-white p-6">
+              <div className="rounded-3xl  bg-white p-6">
                 <Message dismiss={false}>Your cart is empty</Message>
                 <div className="mx-auto mt-4 w-full max-w-[360px]">
                   <Lottie animationData={empty} loop={true} />
