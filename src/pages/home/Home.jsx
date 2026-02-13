@@ -31,6 +31,7 @@ import HeroSection8 from "../../components/HeroSection8.jsx";
 import Fahad from "../../components/Fahad.jsx";
 import Clone from "../../components/Clone.jsx";
 import New from "../../components/New.jsx";
+import Test from "../../components/Test.jsx";
 function Home() {
   const { data: products, isLoading, refetch } = useGetLatestProductsQuery();
 
@@ -52,6 +53,7 @@ function Home() {
         {/* <HeroSection8 /> */}
         {/* <Fahad /> */}
         {/* <Luxery /> */}
+        {/* <Test /> */}
         <HeroSection />
         {/* <HeroSection3 /> */}
         {/* <HeroSection5 /> */}

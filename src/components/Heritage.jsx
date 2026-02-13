@@ -60,7 +60,7 @@ export function HeritageSection() {
       {/* Parallax background */}
       <motion.div style={{ y }} className="absolute inset-0 -top-20 -bottom-20">
         <img
-          src="/q.jpg"
+          src="/1.jpg"
           alt="Clothing craftsmanship"
           className="absolute inset-0 w-full h-full object-cover"
           loading="lazy"
