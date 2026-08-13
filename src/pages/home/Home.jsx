@@ -30,8 +30,12 @@ import { HeritageSection } from "../../components/Heritage.jsx";
 import HeroSection8 from "../../components/HeroSection8.jsx";
 import Fahad from "../../components/Fahad.jsx";
 import Clone from "../../components/Clone.jsx";
+import Clone2 from "../../components/Clone2.jsx";
+import Clone3 from "../../components/Clone3.jsx";
 import New from "../../components/New.jsx";
 import Test from "../../components/Test.jsx";
+import CategoryTabs from "../../components/CategoryTabs.jsx";
+
 function Home() {
   const { data: products, isLoading, refetch } = useGetLatestProductsQuery();
 
@@ -54,12 +58,15 @@ function Home() {
         {/* <Fahad /> */}
         {/* <Luxery /> */}
         {/* <Test /> */}
-        <HeroSection />
+        {/* <Clone2 /> */}
+        <Clone3 />
+        {/* <HeroSection /> */}
+        <CategoryTabs />
         {/* <HeroSection3 /> */}
         {/* <HeroSection5 /> */}
         {/* <HeroSection6 /> */}
         {/* <HeroSection7 /> */}
-        <New />
+        {/* <New /> */}
         {/* <FeaturedProducts products={products} isLoading={isLoading} /> */}
 
         <HeritageSection />
